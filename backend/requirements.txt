@@ -27,3 +27,7 @@ tzlocal==5.3.1
 vine==5.1.0
 wcwidth==0.7.0
 requests==2.32.3
+channels==4.1.0
+daphne==4.1.2
+channels-redis==4.2.1
+

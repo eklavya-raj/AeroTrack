@@ -40,6 +40,7 @@ ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=["localhost", "127.0.0.1"])
 # Installed applications
 # ---------------------------------------------------------------------------
 INSTALLED_APPS = [
+    "daphne",
     # Django built-in
     "django.contrib.admin",
     "django.contrib.auth",
@@ -197,3 +198,16 @@ CELERY_RESULT_SERIALIZER = "json"
 KAFKA_BOOTSTRAP_SERVERS = env(
     "KAFKA_BOOTSTRAP_SERVERS", default="localhost:9092"
 )
+
+# ---------------------------------------------------------------------------
+# Channels Layer (Redis)
+# ---------------------------------------------------------------------------
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels_redis.core.RedisChannelLayer",
+        "CONFIG": {
+            "hosts": [env("REDIS_URL", default="redis://localhost:6379/1")],
+        },
+    },
+}
+
