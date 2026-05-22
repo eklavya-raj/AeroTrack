@@ -16,6 +16,9 @@ import json
 import logging
 from typing import Any
 
+import requests
+
+
 from confluent_kafka import Producer
 from django.conf import settings
 
@@ -66,6 +69,50 @@ class KafkaProducer:
     # ------------------------------------------------------------------
     # Public API
     # ------------------------------------------------------------------
+    def fetch_and_produce_flights(self, topic_name: str = "flight-telemetry") -> None:
+        """Fetch flight data from OpenSky API and produce to Kafka."""
+        url = "https://opensky-network.org/api/states/all"
+        try:
+            logger.info("Fetching state vectors from OpenSky API: %s", url)
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            data = response.json()
+            states = data.get("states", [])
+            
+            if not states:
+                logger.info("No states returned by OpenSky API")
+                return
+
+            logger.info("Fetched %d state vectors from OpenSky API", len(states))
+            for state in states:
+                if len(state) < 12:
+                    continue
+
+                payload = {
+                    "icao24": state[0],
+                    "callsign": state[1].strip() if state[1] else None,
+                    "origin_country": state[2],
+                    "longitude": state[5],
+                    "latitude": state[6],
+                    "baro_altitude": state[7],
+                    "on_ground": state[8],
+                    "velocity": state[9],
+                    "true_track": state[10],
+                    "vertical_rate": state[11],
+                    "squawk": state[14] if len(state) > 14 else None
+                }
+                
+                self.produce(
+                    topic=topic_name,
+                    key=payload["icao24"],
+                    value=payload,
+                )
+            
+            self.flush()
+            logger.info("Successfully produced %d flight states to topic: %s", len(states), topic_name)
+
+        except Exception:
+            logger.exception("Error gathering telemetry data")
     def produce(
         self,
         topic: str,
@@ -113,3 +160,35 @@ class KafkaProducer:
                 "%d Kafka message(s) still in queue after flush timeout", remaining
             )
         return remaining
+
+
+if __name__ == "__main__":
+    import os
+    import sys
+    import time
+    import django
+
+    backend_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    if backend_dir not in sys.path:
+        sys.path.append(backend_dir)
+
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    django.setup()
+
+    logger.info("Initializing flight telemetry ingestion...")
+    try:
+        producer = KafkaProducer()
+    except Exception:
+        logger.exception("Failed to initialize telemetry producer")
+        sys.exit(1)
+
+    logger.info("Starting flight telemetry ingestion loop (interval=10s)...")
+    try:
+        while True:
+            producer.fetch_and_produce_flights()
+            time.sleep(10)
+    except KeyboardInterrupt:
+        logger.info("Telemetry ingestion stopped by user.")
+    except Exception:
+        logger.exception("Fatal error in telemetry ingestion loop")
+        sys.exit(1)

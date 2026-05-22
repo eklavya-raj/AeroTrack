@@ -17,6 +17,20 @@ services:
     environment:
       - DEBUG=1
 
+  # ---- Telemetry Ingestion Service (Dev) ----
+  ingestion:
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=1
+
+  # ---- Telemetry Consumer Service (Dev) ----
+  consumer:
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=1
+
   # ---- React Frontend (Dev) ----
   frontend:
     build:

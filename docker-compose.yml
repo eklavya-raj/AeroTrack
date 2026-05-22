@@ -118,6 +118,44 @@ services:
     networks:
       - aerotrack_network
 
+  # ---- Telemetry Ingestion Service ----
+  ingestion:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: python core/kafka_producer.py
+    env_file:
+      - .env
+    environment:
+      - DEBUG=0
+    depends_on:
+      kafka:
+        condition: service_healthy
+    networks:
+      - aerotrack_network
+
+  # ---- Telemetry Consumer Service ----
+  consumer:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    command: python manage.py run_consumer
+    env_file:
+      - .env
+    environment:
+      - DEBUG=0
+    depends_on:
+      backend:
+        condition: service_started
+      redis:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    networks:
+      - aerotrack_network
+
 volumes:
   postgres_data:
   redis_data:
