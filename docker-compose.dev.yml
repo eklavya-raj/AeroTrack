@@ -1,0 +1,31 @@
+# Development overrides — use with:
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+
+services:
+  # ---- Django Backend (Dev) ----
+  backend:
+    volumes:
+      - ./backend:/app
+    command: python manage.py runserver 0.0.0.0:8000
+    environment:
+      - DEBUG=1
+
+  # ---- Celery Worker (Dev) ----
+  celery_worker:
+    volumes:
+      - ./backend:/app
+    environment:
+      - DEBUG=1
+
+  # ---- React Frontend (Dev) ----
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      target: build
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: pnpm dev --host
+    ports:
+      - "5173:5173"

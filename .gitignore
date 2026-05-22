@@ -1,0 +1,64 @@
+# ========================
+# Python / Django
+# ========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+*.egg
+dist/
+build/
+*.whl
+backend/venv/
+backend/db.sqlite3
+backend/staticfiles/
+backend/media/
+
+# ========================
+# Node / React
+# ========================
+frontend/node_modules/
+frontend/dist/
+frontend/.pnpm-store/
+
+# ========================
+# Environment
+# ========================
+.env
+.env.local
+.env.*.local
+!.env.example
+
+# ========================
+# IDE
+# ========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# ========================
+# Docker
+# ========================
+docker-compose.override.yml
+
+# ========================
+# OS
+# ========================
+Thumbs.db
+.DS_Store
+
+# ========================
+# Misc
+# ========================
+*.log
+*.pid
+*.seed
+coverage/
+.nyc_output/
+htmlcov/
+.coverage
+.pytest_cache/
