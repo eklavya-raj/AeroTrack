@@ -210,4 +210,3 @@ CHANNEL_LAYERS = {
         },
     },
 }
-

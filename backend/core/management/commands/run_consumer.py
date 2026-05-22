@@ -12,7 +12,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         self.stdout.write(self.style.SUCCESS("Initializing Telemetry Consumer..."))
-        
+
         try:
             consumer = TelemetryConsumer()
         except Exception as exc:

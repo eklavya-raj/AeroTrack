@@ -34,7 +34,6 @@ import redis
 from core.models import FlightLog, LandingArchive
 
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -145,13 +144,13 @@ class TelemetryConsumer(KafkaConsumer):
     ):
         if topics is None:
             topics = ["flight-telemetry"]
-        
+
         super().__init__(
             group_id=group_id,
             topics=topics,
             extra_config=extra_config,
         )
-        
+
         redis_url = settings.CACHES["default"]["LOCATION"]
         self.redis_client = redis.Redis.from_url(redis_url)
         logger.info("Connected to Redis at %s", redis_url)
@@ -223,7 +222,12 @@ class TelemetryConsumer(KafkaConsumer):
             alerts = []
             squawk_str = str(squawk).strip() if squawk is not None else ""
             if squawk_str in ["7500", "7600", "7700"]:
-                desc = "Hijacking" if squawk_str == "7500" else ("Radio Failure" if squawk_str == "7600" else "General Emergency")
+                if squawk_str == "7500":
+                    desc = "Hijacking"
+                elif squawk_str == "7600":
+                    desc = "Radio Failure"
+                else:
+                    desc = "General Emergency"
                 alerts.append({
                     "type": "squawk",
                     "code": squawk_str,

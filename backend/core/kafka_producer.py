@@ -78,7 +78,7 @@ class KafkaProducer:
             response.raise_for_status()
             data = response.json()
             states = data.get("states", [])
-            
+
             if not states:
                 logger.info("No states returned by OpenSky API")
                 return
@@ -101,18 +101,18 @@ class KafkaProducer:
                     "vertical_rate": state[11],
                     "squawk": state[14] if len(state) > 14 else None
                 }
-                
                 self.produce(
                     topic=topic_name,
                     key=payload["icao24"],
                     value=payload,
                 )
-            
+
             self.flush()
             logger.info("Successfully produced %d flight states to topic: %s", len(states), topic_name)
 
         except Exception:
             logger.exception("Error gathering telemetry data")
+
     def produce(
         self,
         topic: str,
