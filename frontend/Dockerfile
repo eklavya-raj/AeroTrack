@@ -7,7 +7,7 @@ WORKDIR /app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy package manifests first for better layer caching
-COPY package.json pnpm-lock.yaml .npmrc* ./
+COPY package.json pnpm-lock.yaml .npmrc* pnpm-workspace.yaml* ./
 RUN pnpm install --frozen-lockfile
 
 # Copy source code and build

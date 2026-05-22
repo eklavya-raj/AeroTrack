@@ -1,0 +1,2 @@
+# Disable the supply-chain security minimum release age policy (default 1 day in pnpm v11)
+minimumReleaseAge: 0
